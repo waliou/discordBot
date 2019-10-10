@@ -1,6 +1,6 @@
 import json
 import discord
-import random 
+import random
 from discord.ext import commands
 
 auth = json.load(open('auth.json','r'))
@@ -62,7 +62,7 @@ async def repeat(ctx,*args):
 
 @bot.command()
 async def test(ctx,*args):
-    print(ctx.author.name)
+    await ctx.author.send("Hello")
     print(ctx.guild)
 
 @bot.command()
