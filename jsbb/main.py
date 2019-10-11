@@ -68,10 +68,11 @@ class guessNumberEX():
 
 bot = commands.Bot(command_prefix=':',description="A bizarre bot")
 game = GuessNumber(0,1000)
-room_distribute = {}    #all keys are str
+room_list = {}    #all keys are str
 game_list = {}
 id_counter = 1000
 
+#developer_check
 @bot.event
 async def on_ready():
     print("J\'sBB is open!")
@@ -89,6 +90,7 @@ async def broadcast(ctx,*args):
             if type(channel) == discord.channel.TextChannel:
                 await channel.send("吃我的全頻廣播啦")
 
+#abandoned command
 @bot.command()
 async def play(ctx,*args):
     if len(args) == 0:
@@ -96,23 +98,10 @@ async def play(ctx,*args):
     elif str(args[0]) == "guessNumber":
         await ctx.send("playing guessNumber...")
         await ctx.send(game.play())
-    elif str(args[0]) == "guessNumberEX":
-        if str(args[1]) == "create":
-            game_list[str(id_counter)] = guessNumberEX(id_counter,ctx.author.name)
-            room_distribute[ctx.author.name] = {"guessNumberEX":str(id_counter)}
-            id_counter+=1
-        elif str(args[1]) == "join":
-            if len(args) < 3:
-                await ctx.send("Please enter Room ID")
-            else:
-                room = args[2]
-                if str(room) in game_list.keys:
-                    room_distribute[ctx.author.name] = {"guessNumberEX":str(room)}
-                else:
-                    await ctx.send("Room ID:{} Not Found!!".format(room))
     else:
         await ctx.send('Unknown Command !!')
 
+#guessNumber
 @bot.command()
 async def g(ctx,number = -955536):
     if number != -955536:
@@ -121,6 +110,32 @@ async def g(ctx,number = -955536):
     else:
         await ctx.send("Please enter a number!")
 
+@bot.command()
+async def gnex(ctx,*args):
+    if len(args) == 0:
+        await ctx.send("use \"create\" to create a room")
+        await ctx.send("use \"join [room]\" to join a exist room")
+    elif args[0] == "create":
+        global id_counter
+        room = str(id_counter)
+        game_list[room] = {"name":"guessNumberEX","game":guessNumberEX(room,ctx.author.name),"owner":ctx.author.name,"member":[]}
+        room_list[ctx.author.name] = {"GuessNumberEX":room}
+        await ctx.send("Room {} has created! {} call your friend to join now!".format(room,ctx.author.name))
+        id_counter += 1
+    elif args[0] == "join":
+        if len(args) >= 2:
+            room = str(args[1])
+            if room in game_list.keys():
+                room_list[ctx.author.name] = {"guessNumberEX":room}
+                await ctx.send(ctx.author.name +" join the Room: {}".format(room))
+            else:
+                await ctx.send("Room {} not found!".format(room))
+        else:
+            await ctx.send("Please Enter Room ID !")
+    else:
+        await ctx.send("Unknown Command !!")
+
+#help instruction
 bot.remove_command("help")
 @bot.command()
 async def help(ctx,*arg):
