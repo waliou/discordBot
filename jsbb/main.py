@@ -61,9 +61,13 @@ async def repeat(ctx,*args):
     await ctx.send("".join(args))
 
 @bot.command()
-async def test(ctx,*args):
-    await ctx.author.send("Hello")
-    print(ctx.guild)
+async def broadcast(ctx,*args):
+    for guild in bot.guilds:
+        for channel in guild.channels:
+            if type(channel) == discord.channel.TextChannel:
+                await channel.send("吃我的全頻廣播啦")
+
+            
 
 @bot.command()
 async def play(ctx,*args):
@@ -76,8 +80,8 @@ async def play(ctx,*args):
         await ctx.send('Unknown Command !!')
 
 @bot.command()
-async def g(ctx,number = -891221):
-    if number != -891221:
+async def g(ctx,number = -955536):
+    if number != -955536:
         result = game.guess(number)
         await ctx.send(result)
     else:
