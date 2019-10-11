@@ -47,8 +47,30 @@ class GuessNumber():
                 return "too big({}~{})".format(self.left,self.right)
 
 
+class guessNumberEX():
+    def __init__(self,room,owner,min_ = 0,max_ = 1000):
+        self.room = str(room)
+        self.owner = owner
+        self.min = min_
+        self.max = max_
+        self.left = self.min
+        self.right = self.max
+        self.answer = 0
+        self.playing = False
+
+    def get_name(self):
+        return "guessNumberEX"
+
+    def play(self):
+        pass
+
+
+
 bot = commands.Bot(command_prefix=':',description="A bizarre bot")
 game = GuessNumber(0,1000)
+room_distribute = {}    #all keys are str
+game_list = {}
+id_counter = 1000
 
 @bot.event
 async def on_ready():
@@ -67,8 +89,6 @@ async def broadcast(ctx,*args):
             if type(channel) == discord.channel.TextChannel:
                 await channel.send("吃我的全頻廣播啦")
 
-            
-
 @bot.command()
 async def play(ctx,*args):
     if len(args) == 0:
@@ -76,6 +96,20 @@ async def play(ctx,*args):
     elif str(args[0]) == "guessNumber":
         await ctx.send("playing guessNumber...")
         await ctx.send(game.play())
+    elif str(args[0]) == "guessNumberEX":
+        if str(args[1]) == "create":
+            game_list[str(id_counter)] = guessNumberEX(id_counter,ctx.author.name)
+            room_distribute[ctx.author.name] = {"guessNumberEX":str(id_counter)}
+            id_counter+=1
+        elif str(args[1]) == "join":
+            if len(args) < 3:
+                await ctx.send("Please enter Room ID")
+            else:
+                room = args[2]
+                if str(room) in game_list.keys:
+                    room_distribute[ctx.author.name] = {"guessNumberEX":str(room)}
+                else:
+                    await ctx.send("Room ID:{} Not Found!!".format(room))
     else:
         await ctx.send('Unknown Command !!')
 
