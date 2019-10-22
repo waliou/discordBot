@@ -62,11 +62,14 @@ class guessNumberEX():
         return "guessNumberEX"
 
     def play(self):
-        self.answer = random.randint(self.min,self.max)
-        self.left = self.min
-        self.right = self.max
-        self.playing = True
-        return "[Room {}] I have chosen a number! try guess it!({}~{}){}".format(self.room,self.left,self.right,self.answer)
+        if self.playing == False:
+            self.answer = random.randint(self.min,self.max)
+            self.left = self.min
+            self.right = self.max
+            self.playing = True
+            return "[Room {}] I have chosen a number! try guess it!({}~{}){}".format(self.room,self.left,self.right,self.answer)
+        else:
+            return "[Room {}] This game is playing! ({}~{})".format(self.room,self.left,self.right)
 
 
 
@@ -138,9 +141,13 @@ async def gnex(ctx,*args):
         else:
             await ctx.send("Please Enter Room ID !")
     elif args[0] == "myroom":
-        room = room_list[ctx.author.name]["guessNumberEX"]
-        owner = game_list[room]["owner"]
-        await ctx.send("{} is in {}, owner is {}".format(ctx.author.name,room,owner))
+        author = ctx.author.name
+        if author in room_list.keys():
+            room = room_list[author]["guessNumberEX"]
+            owner = game_list[room]["owner"]
+            await ctx.send("{} is in {}, owner is {}".format(author,room,owner))
+        else:
+            await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "play":
         author = ctx.author.name
         if author in room_list.keys():
