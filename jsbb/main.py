@@ -157,45 +157,61 @@ async def gnex(ctx,*args):
         if len(args) >= 2:
             room_id = str(args[1])
             if room_id in room_dict.keys():
-                user_room[ctx.author.name] = {"guessNumberEX":room_id}
-                room_dict[room_id]["member"].append(ctx.author.name)
-                await ctx.send(ctx.author.name +" join the Room: {}".format(room_id))
+                if room_dict[room_id]["name"] == "guessNumberEX":
+                    user_room[ctx.author.name] = {"guessNumberEX":room_id}
+                    if not author in room_dict[room_id]["member"]:
+                        room_dict[room_id]["member"].append(ctx.author.name)
+                    await ctx.send(ctx.author.name +" join the Room: {}".format(room_id))
+                else:
+                    await ctx.send("Room {} is not a gnex room! Sorry {}".format(room_id,author))
             else:
                 await ctx.send("Room {} not found!".format(room_id))
         else:
             await ctx.send("Please Enter Room ID !")
     elif args[0] == "myroom":
         if author in user_room.keys():
-            room_id = user_room[author]["guessNumberEX"]
-            owner = room_dict[room_id]["owner"]
-            await ctx.send("{} is in {}, owner is {}".format(author,room_id,owner))
+            if "guessNumberEX" in user_room[author].keys():
+                room_id = user_room[author]["guessNumberEX"]
+                owner = room_dict[room_id]["owner"]
+                await ctx.send("{} is in gnex-{}, owner is {}".format(author,room_id,owner))
+            else:
+                await ctx.send("{} you are not in a gnex room!".format(author))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "play":
         if author in user_room.keys():
-            room = room_dict[user_room[author]["guessNumberEX"]]
-            if author == room["owner"]:
-                result =  room["game"].play()
-                await ctx.send(result)
-            else :
-                await ctx.send("{} you are not the owner of this room! call {}".format(author,room["owner"]))
+            if "guessNumberEX" in user_room[author].keys():
+                room = room_dict[user_room[author]["guessNumberEX"]]
+                if author == room["owner"]:
+                    result =  room["game"].play()
+                    await ctx.send(result)
+                else :
+                    await ctx.send("{} you are not the owner of this room! call {}".format(author,room["owner"]))
+            else:
+                await ctx.send("{} you are not in a gnex room!".format(author))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "guess":
         if author in user_room.keys():
-            room = room_dict[user_room[author]["guessNumberEX"]]
-            if len(args) >= 2:
-                result = room["game"].guess(author = author,guess_ = int(args[1]))
-                await ctx.send(result)
+            if "guessNumberEX" in user_room[author].keys():
+                room = room_dict[user_room[author]["guessNumberEX"]]
+                if len(args) >= 2:
+                    result = room["game"].guess(author = author,guess_ = int(args[1]))
+                    await ctx.send(result)
+                else:
+                    await ctx.send("{}, please enter a number!".format(author))
             else:
-                await ctx.send("{}, please enter a number!".format(author))
+                await ctx.send("{} you are not in a gnex room!".format(author))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "status":
         if author in user_room.keys():
-            room = room_dict[user_room[author]["guessNumberEX"]]
-            result = room["game"].status()
-            await ctx.send(result)
+            if "guessNumberEX" in user_room[author].keys():
+                room = room_dict[user_room[author]["guessNumberEX"]]
+                result = room["game"].status()
+                await ctx.send(result)
+            else:
+                await ctx.send("{} you are not in a gnex room!".format(author))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     else:
