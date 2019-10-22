@@ -97,8 +97,8 @@ class guessNumberEX():
 
 bot = commands.Bot(command_prefix=':',description="A bizarre bot")
 game = GuessNumber(0,1000)
-room_list = {}    #all keys are str
-game_list = {}
+user_room = {}    #all keys are str
+room_dict = {}
 id_counter = 1000
 
 #developer_check
@@ -149,31 +149,31 @@ async def gnex(ctx,*args):
     elif args[0] == "create":
         global id_counter
         room = str(id_counter)
-        game_list[room] = {"id":room,"name":"guessNumberEX","game":guessNumberEX(room,ctx.author.name),"owner":ctx.author.name,"member":[]}
-        room_list[ctx.author.name] = {"guessNumberEX":room}
+        room_dict[room] = {"id":room,"name":"guessNumberEX","game":guessNumberEX(room,ctx.author.name),"owner":ctx.author.name,"member":[]}
+        user_room[ctx.author.name] = {"guessNumberEX":room}
         await ctx.send("Room {} has created! {} call your friend to join now!".format(room,ctx.author.name))
         id_counter += 1
     elif args[0] == "join":
         if len(args) >= 2:
-            room = str(args[1])
-            if room in game_list.keys():
-                room_list[ctx.author.name] = {"guessNumberEX":room}
-                game_list[room]["member"].append(ctx.author.name)
-                await ctx.send(ctx.author.name +" join the Room: {}".format(room))
+            room_id = str(args[1])
+            if room_id in room_dict.keys():
+                user_room[ctx.author.name] = {"guessNumberEX":room_id}
+                room_dict[room_id]["member"].append(ctx.author.name)
+                await ctx.send(ctx.author.name +" join the Room: {}".format(room_id))
             else:
-                await ctx.send("Room {} not found!".format(room))
+                await ctx.send("Room {} not found!".format(room_id))
         else:
             await ctx.send("Please Enter Room ID !")
     elif args[0] == "myroom":
-        if author in room_list.keys():
-            room = room_list[author]["guessNumberEX"]
-            owner = game_list[room]["owner"]
-            await ctx.send("{} is in {}, owner is {}".format(author,room,owner))
+        if author in user_room.keys():
+            room_id = user_room[author]["guessNumberEX"]
+            owner = room_dict[room_id]["owner"]
+            await ctx.send("{} is in {}, owner is {}".format(author,room_id,owner))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "play":
-        if author in room_list.keys():
-            room = game_list[room_list[author]["guessNumberEX"]]
+        if author in user_room.keys():
+            room = room_dict[user_room[author]["guessNumberEX"]]
             if author == room["owner"]:
                 result =  room["game"].play()
                 await ctx.send(result)
@@ -182,8 +182,8 @@ async def gnex(ctx,*args):
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "guess":
-        if author in room_list.keys():
-            room = game_list[room_list[author]["guessNumberEX"]]
+        if author in user_room.keys():
+            room = room_dict[user_room[author]["guessNumberEX"]]
             if len(args) >= 2:
                 result = room["game"].guess(author = author,guess_ = int(args[1]))
                 await ctx.send(result)
@@ -192,8 +192,8 @@ async def gnex(ctx,*args):
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     elif args[0] == "status":
-        if author in room_list.keys():
-            room = game_list[room_list[author]["guessNumberEX"]]
+        if author in user_room.keys():
+            room = room_dict[user_room[author]["guessNumberEX"]]
             result = room["game"].status()
             await ctx.send(result)
         else:
