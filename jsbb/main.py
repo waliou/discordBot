@@ -62,7 +62,7 @@ class guessNumberEX():
         return "guessNumberEX"
 
     def play(self):
-        if self.playing == False:
+        if not self.playing:
             self.answer = random.randint(self.min,self.max)
             self.left = self.min
             self.right = self.max
@@ -70,6 +70,21 @@ class guessNumberEX():
             return "[Room {}] I have chosen a number! try guess it!({}~{}){}".format(self.room,self.left,self.right,self.answer)
         else:
             return "[Room {}] This game is playing! ({}~{})".format(self.room,self.left,self.right)
+    def guess(self,author,guess_):
+        if self.playing:
+            if not guess_ in range(self.left, self.right+1):
+                return "[Room {}] {} guess a number {}, out of range~({}~{})".format(self.room,author,guess_,self.left,self.right)
+            if guess_ == self.answer:
+                self.playing = False
+                return "[Room {}] {} got the answer!".format(self.room, author)
+            elif guess_ > self.answer:
+                self.right = guess_
+                return "[Room {}] {} guess a number {}, too big!({}~{})".format(self.room,author,guess_,self.left,self.right)
+            else:
+                self.left = guess_
+                return "[Room {}] {} guess a number {}, too small!({}~{})".format(self.room,author,guess_,self.left,self.right)
+        else:
+            return "[Room {}] No game is running, call the owner: {}".format(self.room,self.owner)
 
 
 
@@ -122,6 +137,7 @@ async def gnex(ctx,*args):
     if len(args) == 0:
         await ctx.send("use \"create\" to create a room")
         await ctx.send("use \"join [room]\" to join a exist room")
+        await ctx.send("use \"myroom\" to check who you are")
     elif args[0] == "create":
         global id_counter
         room = str(id_counter)
@@ -159,7 +175,17 @@ async def gnex(ctx,*args):
                 await ctx.send("{} you are not the owner of this room! call {}".format(author,room["owner"]))
         else:
             await ctx.send("{} you are not in any room! Create one or Join one".format(author))
-
+    elif args[0] == "guess":
+        author = ctx.author.name
+        if author in room_list.keys():
+            room = game_list[room_list[author]["guessNumberEX"]]
+            if len(args) >= 2:
+                result = room["game"].guess(author = author,guess_ = int(args[1]))
+                await ctx.send(result)
+            else:
+                await ctx.send("{}, please enter a number!".format(author))
+        else:
+            await ctx.send("{} you are not in any room! Create one or Join one".format(author))
     else:
         await ctx.send("Unknown Command !!")
 
