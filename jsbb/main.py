@@ -62,7 +62,11 @@ class guessNumberEX():
         return "guessNumberEX"
 
     def play(self):
-        pass
+        self.answer = random.randint(self.min,self.max)
+        self.left = self.min
+        self.right = self.max
+        self.playing = True
+        return "[Room {}] I have chosen a number! try guess it!({}~{}){}".format(self.room,self.left,self.right,self.answer)
 
 
 
@@ -118,8 +122,8 @@ async def gnex(ctx,*args):
     elif args[0] == "create":
         global id_counter
         room = str(id_counter)
-        game_list[room] = {"name":"guessNumberEX","game":guessNumberEX(room,ctx.author.name),"owner":ctx.author.name,"member":[]}
-        room_list[ctx.author.name] = {"GuessNumberEX":room}
+        game_list[room] = {"id":room,"name":"guessNumberEX","game":guessNumberEX(room,ctx.author.name),"owner":ctx.author.name,"member":[]}
+        room_list[ctx.author.name] = {"guessNumberEX":room}
         await ctx.send("Room {} has created! {} call your friend to join now!".format(room,ctx.author.name))
         id_counter += 1
     elif args[0] == "join":
@@ -127,11 +131,28 @@ async def gnex(ctx,*args):
             room = str(args[1])
             if room in game_list.keys():
                 room_list[ctx.author.name] = {"guessNumberEX":room}
+                game_list[room]["member"].append(ctx.author.name)
                 await ctx.send(ctx.author.name +" join the Room: {}".format(room))
             else:
                 await ctx.send("Room {} not found!".format(room))
         else:
             await ctx.send("Please Enter Room ID !")
+    elif args[0] == "myroom":
+        room = room_list[ctx.author.name]["guessNumberEX"]
+        owner = game_list[room]["owner"]
+        await ctx.send("{} is in {}, owner is {}".format(ctx.author.name,room,owner))
+    elif args[0] == "play":
+        author = ctx.author.name
+        if author in room_list.keys():
+            room = game_list[room_list[author]["guessNumberEX"]]
+            if author == room["owner"]:
+                result =  room["game"].play()
+                await ctx.send(result)
+            else :
+                await ctx.send("{} you are not the owner of this room! call {}".format(author,room["owner"]))
+        else:
+            await ctx.send("{} you are not in any room! Create one or Join one".format(author))
+
     else:
         await ctx.send("Unknown Command !!")
 
